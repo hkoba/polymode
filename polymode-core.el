@@ -1051,7 +1051,17 @@ switch."
                                 ;; from here
                                 buffer))))))
     ;; no further action if BUFFER is already the current buffer
-    (unless (eq buffer cbuf)
+    (when (and (not (eq buffer cbuf))
+               ;;
+               ;; A workaround for <https://youtu.be/-SLDlCa0p6M>.
+               ;; Skip pm--select-existing-buffer-visibly
+               ;; if both buffer and cbuf are base buffers.
+               ;; It is observed when yanking whole text from a buffer
+               ;; in poly-yatt-html mode with properties to an empty
+               ;; buffer in poly-yatt-html mode.
+               ;;
+               (not (and (string-match "^ " (buffer-name buffer))
+                         (string-match "^ " (buffer-name cbuf)))))
       (when (and own visibly)
         (run-hook-with-args 'polymode-before-switch-buffer-hook
                             cbuf buffer))
